@@ -19,7 +19,9 @@ fun `run mcp server`() {
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
-            json()
+            json(Json {
+                ignoreUnknownKeys = true
+            })
         }
     }
 
@@ -96,6 +98,59 @@ fun `run mcp server`() {
                     percent_change: ${adaInfo.percent_change}
                     timestamp: ${adaInfo.timestamp}
                     """.trimIndent()
+                )
+            )
+        )
+    }
+
+    server.addTool(
+        name = "get_stock_overview",
+        description = "Get stock company overview by symbol (e.g., AAPL:NASDAQ)",
+        inputSchema = Tool.Input(
+            properties = buildJsonObject {
+                put("symbol", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Stock symbol, e.g., AAPL:NASDAQ"))
+                })
+                put("language", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Language code, e.g., en"))
+                })
+            },
+            required = listOf("symbol")
+        )
+    ) { input ->
+        println("DEBUG: input class = ${input?.javaClass}, value = $input")
+        val jsonInput = try {
+            Json.parseToJsonElement(input as String).jsonObject
+        } catch (e: Exception) {
+            null
+        }
+        val symbol = jsonInput?.get("symbol")?.jsonPrimitive?.content ?: "AAPL:NASDAQ"
+        val language = jsonInput?.get("language")?.jsonPrimitive?.content ?: "en"
+        val overviewResponse = runBlocking { httpClient.getStockOverview(apiKey, symbol, language) }
+        val overview = overviewResponse.data
+        CallToolResult(
+            content = listOf(
+                TextContent(
+                    if (overview != null) {
+                        """
+                        Name: ${overview.name}
+                        Symbol: ${overview.symbol}
+                        Price: ${overview.price}
+                        Change: ${overview.change} (${overview.change_percent}%)
+                        Market Cap: ${overview.company_market_cap}
+                        CEO: ${overview.company_ceo}
+                        Website: ${overview.company_website}
+                        Country: ${overview.company_country}
+                        Exchange: ${overview.exchange}
+                        Year High: ${overview.year_high}
+                        Year Low: ${overview.year_low}
+                        About: ${overview.about}
+                        """.trimIndent()
+                    } else {
+                        "No data returned from API."
+                    }
                 )
             )
         )

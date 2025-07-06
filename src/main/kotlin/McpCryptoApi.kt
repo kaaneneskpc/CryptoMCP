@@ -31,6 +31,20 @@ suspend fun HttpClient.getAdaPrice(apiKey: String): AdaCryptoInfo {
     return response
 }
 
+suspend fun HttpClient.getStockOverview(
+    apiKey: String,
+    symbol: String,
+    language: String = "en"
+): StockCompanyOverviewResponse {
+    val response = this.get("https://real-time-finance-data.p.rapidapi.com/stock-overview") {
+        url.parameters.append("symbol", symbol)
+        url.parameters.append("language", language)
+        header("X-RapidAPI-Key", apiKey)
+        header("X-RapidAPI-Host", "real-time-finance-data.p.rapidapi.com")
+    }.body<StockCompanyOverviewResponse>()
+    return response
+}
+
 @Serializable
 data class CryptoNewsResponse(
     val data: List<CryptoNews>
@@ -52,4 +66,56 @@ data class AdaCryptoInfo(
     val volume_24h: Double,
     val percent_change: Double,
     val timestamp: String
+)
+
+@Serializable
+data class StockCompanyOverviewResponse(
+    val status: String? = null,
+    val request_id: String? = null,
+    val data: StockCompanyOverview? = null
+)
+
+@Serializable
+data class StockCompanyOverview(
+    val about: String? = null,
+    val avg_volume: Int? = null,
+    val change: Double? = null,
+    val change_percent: Double? = null,
+    val company_ceo: String? = null,
+    val company_city: String? = null,
+    val company_country: String? = null,
+    val company_country_code: String? = null,
+    val company_dividend_yield: Double? = null,
+    val company_employees: Int? = null,
+    val company_founded_date: String? = null,
+    val company_market_cap: Long? = null,
+    val company_pe_ratio: Double? = null,
+    val company_state: String? = null,
+    val company_street_address: String? = null,
+    val company_website: String? = null,
+    val country_code: String? = null,
+    val currency: String? = null,
+    val exchange: String? = null,
+    val exchange_close: String? = null,
+    val exchange_open: String? = null,
+    val google_mid: String? = null,
+    val high: Double? = null,
+    val last_update_utc: String? = null,
+    val low: Double? = null,
+    val name: String? = null,
+    val open: Double? = null,
+    val pre_or_post_market: Double? = null,
+    val pre_or_post_market_change: Int? = null,
+    val pre_or_post_market_change_percent: Int? = null,
+    val previous_close: Double? = null,
+    val price: Double? = null,
+    val primary_exchange: String? = null,
+    val symbol: String? = null,
+    val timezone: String? = null,
+    val type: String? = null,
+    val utc_offset_sec: Int? = null,
+    val volume: Int? = null,
+    val wikipedia_url: String? = null,
+    val year_high: Double? = null,
+    val year_low: Double? = null
 )
