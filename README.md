@@ -5,6 +5,12 @@
 
 It is an MCP server written in Kotlin that provides information, analysis, news, and more related to cryptocurrency using the Model Context Protocol (MCP). This project was developed to provide cryptocurrency news to LLM surfaces in a standardized manner using the MCP protocol.
 
+
+
+https://github.com/user-attachments/assets/7ada32ec-c918-4afb-90af-6c2ffc9d5aad
+
+
+
 ## Features
 - MCP protocol-compliant server
 - Presentation of crypto-related information
