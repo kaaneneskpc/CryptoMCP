@@ -77,6 +77,30 @@ fun `run mcp server`() {
         )
     }
 
+    server.addTool(
+        name = "get_ada_price",
+        description = "Get the latest ADA coin price",
+        inputSchema = Tool.Input(
+            properties = buildJsonObject { },
+            required = emptyList()
+        )
+    ) { _ ->
+        val adaInfo = runBlocking { httpClient.getAdaPrice(apiKey) }
+        CallToolResult(
+            content = listOf(
+                TextContent(
+                    """
+                    symbol: ${adaInfo.symbol}
+                    price: ${adaInfo.price}
+                    volume_24h: ${adaInfo.volume_24h}
+                    percent_change: ${adaInfo.percent_change}
+                    timestamp: ${adaInfo.timestamp}
+                    """.trimIndent()
+                )
+            )
+        )
+    }
+
     val transport = StdioServerTransport(
         System.`in`.asInput(),
         System.out.asSink().buffered()

@@ -23,6 +23,14 @@ suspend fun HttpClient.getDailyCryptoNewsFromTheGuardian(apiKey: String): List<C
     return response.data
 }
 
+suspend fun HttpClient.getAdaPrice(apiKey: String): AdaCryptoInfo {
+    val response = this.get("https://cardano-price.p.rapidapi.com/ADA.json") {
+        header("X-RapidAPI-Key", apiKey)
+        header("X-RapidAPI-Host", "cardano-price.p.rapidapi.com")
+    }.body<AdaCryptoInfo>()
+    return response
+}
+
 @Serializable
 data class CryptoNewsResponse(
     val data: List<CryptoNews>
@@ -35,4 +43,13 @@ data class CryptoNews(
     val description: String,
     val thumbnail: String,
     val createdAt: String
+)
+
+@Serializable
+data class AdaCryptoInfo(
+    val symbol: String,
+    val price: Double,
+    val volume_24h: Double,
+    val percent_change: Double,
+    val timestamp: String
 )
