@@ -15,7 +15,7 @@ import kotlinx.io.buffered
 import kotlinx.serialization.json.*
 
 fun `run mcp server`() {
-    val apiKey = "YOUR_API_KEY"
+    val apiKey = "9011a061ddmshdcac094b3abbca8p148193jsn73c07c2d8fdf"
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -153,6 +153,62 @@ fun `run mcp server`() {
                     }
                 )
             )
+        )
+    }
+
+    server.addTool(
+        name = "get_cash_flow",
+        description = "Get cash flow overview by symbol (e.g., AAPL:NASDAQ)",
+        inputSchema = Tool.Input(
+            properties = buildJsonObject {
+                put("symbol", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Stock symbol, e.g., AAPL:NASDAQ"))
+                })
+                put("period", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Period for cash flow data, e.g., QUARTERLY or ANNUAL"))
+                })
+                put("language", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Language code for the response, e.g., en"))
+                })
+            },
+            required = listOf("symbol", "period")
+        )
+    ) { input ->
+        val jsonInput = try {
+            Json.parseToJsonElement(input as String).jsonObject
+        } catch (e: Exception) {
+            null
+        }
+        val symbol = jsonInput?.get("symbol")?.jsonPrimitive?.content ?: "AAPL:NASDAQ"
+        val period = jsonInput?.get("period")?.jsonPrimitive?.content ?: "QUARTERLY"
+        val language = jsonInput?.get("language")?.jsonPrimitive?.content ?: "en"
+        val cashFlowResponse = runBlocking { httpClient.getCashFlow(apiKey, symbol, period, language) }
+        val companyCashFlow = cashFlowResponse.data
+        CallToolResult(
+            content = if (companyCashFlow != null && companyCashFlow.cash_flow.isNotEmpty()) {
+                companyCashFlow.cash_flow.map { cf ->
+                    TextContent(
+                        """
+                        Symbol: ${companyCashFlow.symbol}
+                        Period: ${companyCashFlow.period}
+                        Type: ${companyCashFlow.type}
+                        Date: ${cf.date} (Year: ${cf.year}, Month: ${cf.month}, Day: ${cf.day})
+                        Currency: ${cf.currency}
+                        Cash from Operations: ${cf.cash_from_operations}
+                        Cash from Investing: ${cf.cash_from_investing}
+                        Cash from Financing: ${cf.cash_from_financing}
+                        Net Income: ${cf.net_income}
+                        Free Cash Flow: ${cf.free_cash_flow}
+                        Net Change in Cash: ${cf.net_change_in_cash}
+                        """.trimIndent()
+                    )
+                }
+            } else {
+                listOf(TextContent("No cash flow data returned from API."))
+            }
         )
     }
 

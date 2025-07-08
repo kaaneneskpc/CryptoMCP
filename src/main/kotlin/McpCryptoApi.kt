@@ -45,6 +45,53 @@ suspend fun HttpClient.getStockOverview(
     return response
 }
 
+
+suspend fun HttpClient.getCashFlow(
+    apiKey: String,
+    symbol: String,
+    period: String,
+    language: String = "en"
+): CompanyCashFlowResponse {
+    val response = this.get("https://real-time-finance-data.p.rapidapi.com/company-cash-flow") {
+        url.parameters.append("symbol", symbol)
+        url.parameters.append("period", period)
+        url.parameters.append("language", language)
+        header("X-RapidAPI-Key", apiKey)
+        header("X-RapidAPI-Host", "real-time-finance-data.p.rapidapi.com")
+    }.body<CompanyCashFlowResponse>()
+    return response
+}
+
+@Serializable
+data class CompanyCashFlowResponse(
+    val request_id: String,
+    val status: String,
+    val data: CompanyCashFlow? = null
+)
+
+@Serializable
+data class CompanyCashFlow(
+    val cash_flow: List<CashFlow>,
+    val period: String,
+    val symbol: String,
+    val type: String
+)
+
+@Serializable
+data class CashFlow(
+    val cash_from_financing: Long,
+    val cash_from_investing: Long,
+    val cash_from_operations: Long,
+    val currency: String,
+    val date: String,
+    val day: Int,
+    val free_cash_flow: Long,
+    val month: Int,
+    val net_change_in_cash: Long,
+    val net_income: Long,
+    val year: Int
+)
+
 @Serializable
 data class CryptoNewsResponse(
     val data: List<CryptoNews>
