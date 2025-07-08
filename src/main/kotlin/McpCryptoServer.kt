@@ -15,7 +15,7 @@ import kotlinx.io.buffered
 import kotlinx.serialization.json.*
 
 fun `run mcp server`() {
-    val apiKey = "9011a061ddmshdcac094b3abbca8p148193jsn73c07c2d8fdf"
+    val apiKey = "YOUR_API_KEY"
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -120,7 +120,6 @@ fun `run mcp server`() {
             required = listOf("symbol")
         )
     ) { input ->
-        println("DEBUG: input class = ${input?.javaClass}, value = $input")
         val jsonInput = try {
             Json.parseToJsonElement(input as String).jsonObject
         } catch (e: Exception) {
@@ -208,6 +207,63 @@ fun `run mcp server`() {
                 }
             } else {
                 listOf(TextContent("No cash flow data returned from API."))
+            }
+        )
+    }
+
+    server.addTool(
+        name = "get_income_statement",
+        description = "Get income statement overview by symbol (e.g., AAPL:NASDAQ)",
+        inputSchema = Tool.Input(
+            properties = buildJsonObject {
+                put("symbol", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Stock symbol, e.g., AAPL:NASDAQ"))
+                })
+                put("period", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Period for income statement data, e.g., QUARTERLY or ANNUAL"))
+                })
+                put("language", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Language code for the response, e.g., en"))
+                })
+            },
+            required = listOf("symbol", "period")
+        )
+    ) { input ->
+        val jsonInput = try {
+            Json.parseToJsonElement(input as String).jsonObject
+        } catch (e: Exception) {
+            null
+        }
+        val symbol = jsonInput?.get("symbol")?.jsonPrimitive?.content ?: "AAPL:NASDAQ"
+        val period = jsonInput?.get("period")?.jsonPrimitive?.content ?: "QUARTERLY"
+        val language = jsonInput?.get("language")?.jsonPrimitive?.content ?: "en"
+        val incomeStatementResponse = runBlocking { httpClient.getIncomeStatement(apiKey, symbol, period, language) }
+        val incomeStatementList = incomeStatementResponse.data
+        CallToolResult(
+            content = if (incomeStatementList != null && incomeStatementList.income_statement.isNotEmpty()) {
+                incomeStatementList.income_statement.map { isItem ->
+                    TextContent(
+                        """
+                        Symbol: ${incomeStatementList.symbol}
+                        Period: ${incomeStatementList.period}
+                        Type: ${incomeStatementList.type}
+                        Date: ${isItem.date} (Year: ${isItem.year}, Month: ${isItem.month}, Day: ${isItem.day})
+                        Currency: ${isItem.currency}
+                        Revenue: ${isItem.revenue}
+                        Net Income: ${isItem.net_income}
+                        EBITDA: ${isItem.EBITDA}
+                        Earnings Per Share: ${isItem.earnings_per_share}
+                        Net Profit Margin: ${isItem.net_profit_margin}
+                        Operating Expense: ${isItem.operating_expense}
+                        Effective Tax Rate (%): ${isItem.effective_task_rate_percent}
+                        """.trimIndent()
+                    )
+                }
+            } else {
+                listOf(TextContent("No income statement data returned from API."))
             }
         )
     }

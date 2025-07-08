@@ -62,6 +62,54 @@ suspend fun HttpClient.getCashFlow(
     return response
 }
 
+suspend fun HttpClient.getIncomeStatement(
+    apiKey: String,
+    symbol: String,
+    period: String,
+    language: String = "en"
+): CompanyIncomeStatementResponse {
+    val response = this.get("https://real-time-finance-data.p.rapidapi.com/company-income-statement") {
+        url.parameters.append("symbol", symbol)
+        url.parameters.append("period", period)
+        url.parameters.append("language", language)
+        header("X-RapidAPI-Key", apiKey)
+        header("X-RapidAPI-Host", "real-time-finance-data.p.rapidapi.com")
+    }.body<CompanyIncomeStatementResponse>()
+    return response
+}
+
+
+@Serializable
+data class CompanyIncomeStatementResponse(
+    val request_id: String? = null,
+    val status: String? = null,
+    val data: CompanyIncomeStatement? = null
+)
+
+@Serializable
+data class CompanyIncomeStatement(
+    val income_statement: List<IncomeStatement>,
+    val period: String,
+    val symbol: String,
+    val type: String
+)
+
+@Serializable
+data class IncomeStatement(
+    val EBITDA: Long,
+    val currency: String,
+    val date: String,
+    val day: Int,
+    val earnings_per_share: Double,
+    val effective_task_rate_percent: Double,
+    val month: Int,
+    val net_income: Long,
+    val net_profit_margin: Double,
+    val operating_expense: Long,
+    val revenue: Long,
+    val year: Int
+)
+
 @Serializable
 data class CompanyCashFlowResponse(
     val request_id: String,
