@@ -6,7 +6,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import kotlinx.serialization.Serializable
 
-// Extension function to fetch daily crypto news
+
 suspend fun HttpClient.getDailyCryptoNews(apiKey: String): List<CryptoNews> {
     val response = this.get("https://cryptocurrency-news2.p.rapidapi.com/v1/cryptodaily") {
         header("X-RapidAPI-Key", apiKey)

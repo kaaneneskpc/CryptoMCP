@@ -15,7 +15,7 @@ import kotlinx.io.buffered
 import kotlinx.serialization.json.*
 
 fun `run mcp server`() {
-    val apiKey = "9011a061ddmshdcac094b3abbca8p148193jsn73c07c2d8fdf"
+    val apiKey = "YOUR_API_KEY"
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
