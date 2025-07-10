@@ -15,7 +15,7 @@ import kotlinx.io.buffered
 import kotlinx.serialization.json.*
 
 fun `run mcp server`() {
-    val apiKey = "YOUR_API_KEY"
+    val apiKey = "9011a061ddmshdcac094b3abbca8p148193jsn73c07c2d8fdf"
 
     val httpClient = HttpClient {
         install(ContentNegotiation) {
@@ -312,6 +312,58 @@ fun `run mcp server`() {
                 """.trimIndent()
                 )
             )
+        )
+    }
+
+    server.addTool(
+        name = "get_economic_events",
+        description = "Get economic events for given date range and countries",
+        inputSchema = Tool.Input(
+            properties = buildJsonObject {
+                put("from", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Start date in YYYY-MM-DD format"))
+                })
+                put("to", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("End date in YYYY-MM-DD format"))
+                })
+                put("countries", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Comma separated country codes, e.g., US,DE"))
+                })
+            },
+            required = listOf("from", "to", "countries")
+        )
+    ) { input ->
+        val jsonInput = try {
+            Json.parseToJsonElement(input as String).jsonObject
+        } catch (e: Exception) {
+            null
+        }
+        val from = jsonInput?.get("from")?.jsonPrimitive?.content ?: "2024-06-17"
+        val to = jsonInput?.get("to")?.jsonPrimitive?.content ?: "2024-06-19"
+        val countries = jsonInput?.get("countries")?.jsonPrimitive?.content ?: "US,DE"
+
+        val result = runBlocking { httpClient.getEconomicEvents(apiKey, from, to, countries) }
+        CallToolResult(
+            content = result.result?.map { event ->
+                TextContent(
+                    """
+                    Title: ${event.title}
+                    Date: ${event.date}
+                    Country: ${event.country}
+                    Currency: ${event.currency}
+                    Indicator: ${event.indicator}
+                    Actual: ${event.actual}
+                    Forecast: ${event.forecast}
+                    Previous: ${event.previous}
+                    Importance: ${event.importance}
+                    Comment: ${event.comment}
+                    Link: ${event.link}
+                    """.trimIndent()
+                )
+            } ?: listOf(TextContent("No economic events data returned from API."))
         )
     }
 

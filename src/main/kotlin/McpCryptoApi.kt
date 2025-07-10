@@ -96,6 +96,50 @@ suspend fun HttpClient.convertCurrency(
     return response
 }
 
+suspend fun HttpClient.getEconomicEvents(
+    apiKey: String,
+    from: String,
+    to: String,
+    countries: String
+): EconomicEventsResponse {
+    val response = this.get("https://ultimate-economic-calendar.p.rapidapi.com/economic-events/tradingview") {
+        url {
+            parameters.append("from", from)
+            parameters.append("to", to)
+            parameters.append("countries", countries)
+        }
+        header("x-rapidapi-key", apiKey)
+        header("x-rapidapi-host", "ultimate-economic-calendar.p.rapidapi.com")
+    }.body<EconomicEventsResponse>()
+    return response
+}
+
+@Serializable
+data class EconomicEventsResponse(
+    val result: List<EconomicEvents> ? = null,
+    val status: String? = null
+)
+
+@Serializable
+data class EconomicEvents(
+    val actual: Double?,
+    val comment: String,
+    val country: String,
+    val currency: String,
+    val date: String,
+    val forecast: Double?,
+    val id: String,
+    val importance: Int,
+    val indicator: String,
+    val link: String,
+    val period: String,
+    val previous: Double?,
+    val scale: String,
+    val source: String,
+    val title: String,
+    val unit: String
+)
+
 
 @Serializable
 data class CompanyIncomeStatementResponse(
