@@ -267,6 +267,53 @@ fun `run mcp server`() {
             }
         )
     }
+    server.addTool(
+        name = "convert_currency",
+        description = "Convert currency from one to another",
+        inputSchema = Tool.Input(
+            properties = buildJsonObject {
+                put("from", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Source currency code, e.g., USD"))
+                })
+                put("to", buildJsonObject {
+                    put("type", JsonPrimitive("string"))
+                    put("description", JsonPrimitive("Target currency code, e.g., EUR"))
+                })
+                put("amount", buildJsonObject {
+                    put("type", JsonPrimitive("integer"))
+                    put("description", JsonPrimitive("Amount to convert"))
+                })
+            },
+            required = listOf("from", "to", "amount")
+        )
+    ) { input ->
+        val jsonInput = try {
+            Json.parseToJsonElement(input as String).jsonObject
+        } catch (e: Exception) {
+            null
+        }
+        val from = jsonInput?.get("from")?.jsonPrimitive?.content ?: "USD"
+        val to = jsonInput?.get("to")?.jsonPrimitive?.content ?: "EUR"
+        val amount = jsonInput?.get("amount")?.jsonPrimitive?.int ?: 1
+
+        val result = runBlocking { httpClient.convertCurrency(apiKey, from, to, amount) }
+        CallToolResult(
+            content = listOf(
+                TextContent(
+                    """
+                From: $from
+                To: $to
+                Amount: $amount
+                Result: ${result.result}
+                Rate: ${result.info?.rate}
+                Date: ${result.date}
+                Success: ${result.success}
+                """.trimIndent()
+                )
+            )
+        )
+    }
 
     val transport = StdioServerTransport(
         System.`in`.asInput(),

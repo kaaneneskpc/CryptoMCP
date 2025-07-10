@@ -78,6 +78,24 @@ suspend fun HttpClient.getIncomeStatement(
     return response
 }
 
+suspend fun HttpClient.convertCurrency(
+    apiKey: String,
+    from: String,
+    to: String,
+    amount: Int
+): ConvertResponse {
+    val response = this.get("https://currency-conversion-and-exchange-rates.p.rapidapi.com/convert") {
+        url {
+            parameters.append("from", from)
+            parameters.append("to", to)
+            parameters.append("amount", amount.toString())
+        }
+        header("x-rapidapi-key", apiKey)
+        header("x-rapidapi-host", "currency-conversion-and-exchange-rates.p.rapidapi.com")
+    }.body<ConvertResponse>()
+    return response
+}
+
 
 @Serializable
 data class CompanyIncomeStatementResponse(
@@ -213,4 +231,26 @@ data class StockCompanyOverview(
     val wikipedia_url: String? = null,
     val year_high: Double? = null,
     val year_low: Double? = null
+)
+
+@Serializable
+data class ConvertResponse(
+    val date: String? = null,
+    val info: Info ? = null,
+    val query: Query ? = null,
+    val result: Double? = null,
+    val success: Boolean? = null
+)
+
+@Serializable
+data class Info(
+    val rate: Double,
+    val timestamp: Int
+)
+
+@Serializable
+data class Query(
+    val amount: Int,
+    val from: String,
+    val to: String
 )
