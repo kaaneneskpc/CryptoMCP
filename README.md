@@ -3,7 +3,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.modelcontextprotocol/kotlin-sdk.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:io.modelcontextprotocol%20a:kotlin-sdk)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-It is an MCP server written in Kotlin that provides information, analysis, news, and more related to cryptocurrency and provides economic stock overview, cash flow, income statement, economic events and convert with currencies using the Model Context Protocol (MCP). This project was developed to provide cryptocurrency news and coins prices to LLM surfaces in a standardized manner using the MCP protocol.
+It is an MCP server written in Kotlin that provides information, analysis, news, and more related to cryptocurrency and financial using the Model Context Protocol (MCP). This project was developed to provide cryptocurrency news and coins prices to LLM surfaces in a standardized manner using the MCP protocol.
 
 
 
@@ -14,6 +14,7 @@ https://github.com/user-attachments/assets/7ada32ec-c918-4afb-90af-6c2ffc9d5aad
 ## Features
 - MCP protocol-compliant server
 - Presentation of crypto-related information
+- Presentation economic events, stock overview, income statement, cash flow and etc. about financial -related information 
 - Communication via Stdio
 - Easy expandability
 
