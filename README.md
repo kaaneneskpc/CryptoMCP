@@ -14,7 +14,7 @@ https://github.com/user-attachments/assets/7ada32ec-c918-4afb-90af-6c2ffc9d5aad
 ## Features
 - MCP protocol-compliant server
 - Presentation of crypto-related information
-- Presentation economic events, stock overview, income statement, cash flow and etc. about financial -related information 
+- Presentation economic events, stock overview, income statement, cash flow and etc. about financial-related information 
 - Communication via Stdio
 - Easy expandability
 
