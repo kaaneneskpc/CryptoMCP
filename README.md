@@ -9,6 +9,8 @@ It is an MCP server written in Kotlin that provides information, analysis, news,
 
 https://github.com/user-attachments/assets/7ada32ec-c918-4afb-90af-6c2ffc9d5aad
 
+https://github.com/user-attachments/assets/f95ad266-8c3e-45f0-850e-e63f570053f2
+
 
 
 ## Features
